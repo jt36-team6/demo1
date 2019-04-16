@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+        <!--default-autowire="byName"-->
+    <!--注入db.properties配置文件-->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:db.properties"/>
+    </bean>
+
+    <!--设置数据源-->
+    <bean name="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="url" value="${DB_URL}"/>
+        <property name="driverClassName" value="${DB_DRIVER}" />
+        <property name="username" value="${DB_NAME}"/>
+        <property name="password" value="${DB_PWD}"/>
+    </bean>
+
+
+    <bean name="sqlSession" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--加载mybatis的配置文件-->
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <!--扫描映射文件-->
+        <property name="mapperLocations" value="classpath:mapping/*.xml"/>
+        <!--给类取别名-->
+        <property name="typeAliasesPackage" value="com.szxs.entity"/>
+        <property name="dataSource" ref="dataSource"/>
+        <!--与上面的default-autowire="byName"效果相同-->
+    </bean>
+    <!--用于注入dao的实现类，类似于sqlSession.getMapper(***Dao.class)-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--把dao下面的接口统统扫进去-->
+        <property name="basePackage" value="com.szxs.dao"/>
+        <!--通过sqlSession拿到相应的dao实现类-->
+        <property name="sqlSessionFactoryBeanName" value="sqlSession"/>
+    </bean>
+
+    <!--声明式事务处理-->
+    <bean name="transactionManager" p:dataSource-ref="dataSource" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" />
+        <!--<property name="dataSource" ref="dataSource"/>-->  <!--与上面的p命名控件注入效果相同-->
+        <!--p:dataSource-ref="dataSource"-->  <!--又与上面的default-autowire="byName"效果相同-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="add*"/>
+            <tx:method name="update*"/>
+            <tx:method name="delete*"/>
+            <tx:method name="query*" propagation="NOT_SUPPORTED"/>
+            <tx:method name="select*" propagation="NOT_SUPPORTED"/>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config>
+        <!--<aop:pointcut id="pointcut" expression="execution(* com.szxs.service..*.*(..))"/>-->
+        <aop:pointcut id="pointcut" expression="execution(public java.lang.Boolean addAnswer(com.szxs.entity.Answers)))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut"/>
+    </aop:config>
+</beans>

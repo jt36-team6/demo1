@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <!-- 环境配置 -->
+    <settings>
+        <setting name="logImpl" value="STDOUT_LOGGING" />
+    </settings>
+
+    <!--给类取别名-->
+    <!--<typeAliases>-->
+        <!--<package name="com.szxs.entity"/>-->
+    <!--</typeAliases>-->
+    <!--已在spring-dao中配置
+  <property name="typeAliasesPackage" value="com.szxs.entity"/>
+，此处可以省略-->
+
+
+    <!-- mapping文件路径配置 -->
+    <!--<mappers>-->
+        <!--<mapper resource="mapping/Questions.xml"/>-->
+        <!--<mapper resource="mapping/Answers.xml"/>-->
+    <!--</mappers>-->
+    <!--已在spring-dao中配置
+    <property name="mapperLocations" value="classpath:mapping/*.xml"/>
+    ，此处可以省略-->
+</configuration>
